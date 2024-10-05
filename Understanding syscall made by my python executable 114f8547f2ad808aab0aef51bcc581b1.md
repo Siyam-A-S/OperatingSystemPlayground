@@ -6,9 +6,8 @@ The OCR scheduler program is a executable made using pyinstaller. It is a tkinte
 strace -c ./main.py
 ```
 
-<aside>
-💡
 
+```nasm
 0.00    0.000000           0        21           read
 0.00    0.000000           0         4           write
 0.00    0.000000           0         6           open
@@ -45,7 +44,7 @@ strace -c ./main.py
 0.00    0.000000           0         4           accept4
 0.00    0.000000           0         1           signalfd4
 
-</aside>
+```
 
 ## Explanation of each system calls:
 
