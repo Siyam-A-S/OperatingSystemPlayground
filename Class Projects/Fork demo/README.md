@@ -6,6 +6,9 @@ System call `fork()` is used to create processes. It takes no arguments and retu
 - `fork()` returns a zero to the newly created child process.
 - `fork()` returns a positive value, the process ID of the child process, to the parent.
 
+> The process that is created is an (almost) exact copy of the calling process. That means that to the OS, it now looks like there are two copies of the program p1 running, and both are about to return from the fork() system call. The newly-created process (called the child, in contrast to the creating parent) doesn’t start running at main(), like you might expect (note, the “hello” message only got printed out once); rather, it just comes into life as if it had called fork() itself.
+
+
 The returned process ID is of type `pid_t` defined in `sys/types.h`. Normally, the process ID is an integer. Moreover, a process can use function `getpid()` to retrieve the process ID assigned to this process. Therefore, after the system call to `fork()`, a simple test can tell which process is the child.
 
 Please note that Unix will make an exact copy of the parent’s address space and give it to the child. Therefore, the parent and child processes have separate address spaces.
