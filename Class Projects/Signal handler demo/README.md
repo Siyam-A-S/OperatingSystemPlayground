@@ -1,0 +1,1 @@
+Simple program that will register signal handler functions, then test signal handlers by issuing a signal from the command line (i.e. Ctrl^C) SIGINT signal.
