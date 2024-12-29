@@ -1,36 +1,45 @@
-### Getting started
-There are various things you can do to quickly and efficiently configure your Codio Box to your exact requirements. 
+# Shared Memory Processes
 
-### GUI Applications and the Virtual Desktop 
-The Virtual Desktop allows you auto develop GUI based applications using any programming language. You can install a Virtual Desktop in your Box. You can then start the desktop and view it within the Codio IDE or in a new browser tab.
+The following main function runs as a server. It uses `IPC_PRIVATE` to request a private shared memory. Since the client is the server’s child process created after the shared memory has been created and attached, the child client process will receive the shared memory in its address space and as a result, no shared memory operations are required.
 
-[Virtual Desktop documentation](https://codio.com/docs/ide/boxes/installsw/gui/)
+This program asks for a shared memory of four integers and attaches this shared memory segment to its address space. Pointer `ShmPTR` points to the shared memory segment. After this is done, we have the following:
 
+![Shared Memory](images/shm-4)
 
-### Command line access and the Terminal window
-All Codio Boxes provide sudo level privileges to the underlying Ubuntu server. This means you can install and configure any component you like. You access the terminal from the **Tools->Terminal** menu item.
+Then, this program forks a child process to run function `ClientProcess()`. Thus, two identical copies of address spaces are created, each of which has a variable `ShmPTR` whose value is a pointer to the shared memory. As a result, the child process has already known the location of the shared memory segment and does not have to use `shmget()` and `shmat()`. This is shown below:
 
-### Debugger
-The Codio IDE comes with a powerful visual debugger. Currently we support Python, Java, C, C++ and NodeJS. Other languages can be added on request.
+![Shared Memory with Fork](images/shm-5)
 
-[Debugger documentation](https://codio.com/docs/ide/features/debugging/)
+The parent waits for the completion of the child. For the child, it just retrieves the four integers, which were stored there by the parent before forking the child, prints them, and exits. The `wait()` system call in the parent will detect this. Finally, the parent exits.
 
+## Task
 
-### Content authoring and assessments
-Codio comes with a very powerful content authoring tool, Codio Guides. Guides is also where you create all forms of auto-graded assessments. 
+You are to write a program that creates two shared variables of type `int`. One integer is the `BankAccount`, another is `Turn`. Both `BankAccount` and `Turn` are initialized to 0. Your program must create two processes, one parent process and one child process, and allow the parent to deposit (i.e., add) money to the `BankAccount`, and also allow the child process to withdraw (i.e., subtract) money from the `BankAccount` using Tanenbaum’s strict alternation (see OS textbook Chap 4). Both the Parent and Child should loop 25 times and follow the rules below each time through the loop.
 
-- [Guides documentation](https://codio.com/docs/content/authoring/overview/)
-- [Assessments documentation](https://codio.com/docs/content/authoring/assessments/)
+### Parent (Dear Old Dad) Rules
 
-### Templating Box configurations and projects
-Codio offers two very powerful templating options so you can create new projects from those templates with just a couple of clicks. **Stacks** allow you to create snapshots of the Box’s underlying software configuration. You can then create new projects from a Stack avoiding having to configure anew each time you start a new project. **Starter Packs** allow you to template an entire project, including workspace code.
+1. Sleep some random amount of time between 0 - 5 seconds.
+2. After waking up, copy the value in `BankAccount` to a local variable `account`.
+3. Loop while `Turn != 0` do no-op.
+4. If the `account` is <= 100, then try to Deposit Money, else call `printf("Dear old Dad: Thinks Student has enough Cash ($%d)\n", account);`.
 
-- [Stacks documentation](https://codio.com/docs/project/stacks/)
-- [Starter Packs documentation](https://codio.com/docs/project/packs/)
+#### Deposit Money:
 
-### Install software
-You can always install software onto your Box using the command line. However, Codio offers a shortcut for commonly installed components that can be accessed from the **Tools->Install Software** menu.
+- Randomly generate a balance amount to give the Student between 0 and 100.
+- If the random number is even: Deposit the amount into the account, then call `printf("Dear old Dad: Deposits $%d / Balance = $%d\n", balance, account);`.
+- If the random number is odd: Then call `printf("Dear old Dad: Doesn't have any money to give\n");`.
+- Copy value from local variable `account` back to `BankAccount`.
+- Set `Turn = 1`.
 
-We can easily add new items to the Install Software screen, so feel free to submit requests.
+### Child (Poor Student) Rules
 
-[Install Software documentation](https://codio.com/docs/ide/boxes/installsw/box-parts/)
+1. Sleep some random amount of time between 0 - 5 seconds.
+2. After waking up, copy the value in `BankAccount` to a local variable `account`.
+3. Loop while `Turn != 1` do no-op.
+4. Randomly generate a balance amount that the Student needs between 0 and 50, then call `printf("Poor Student needs $%d\n", balance);`.
+5. If the balance needed is <= the account: Withdraw the amount from the account, then call `printf("Poor Student: Withdraws $%d / Balance = $%d\n", balance, account);`.
+6. If the balance needed is > than the account: Then call `printf("Poor Student: Not Enough Cash ($%d)\n", account);`.
+7. Copy value from local variable `account` back to `BankAccount`.
+8. Set `Turn = 0`.
+
+Run the reference implementation to compare your output for testing purposes.
