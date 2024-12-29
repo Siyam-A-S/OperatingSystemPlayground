@@ -4,11 +4,11 @@ The following main function runs as a server. It uses `IPC_PRIVATE` to request a
 
 This program asks for a shared memory of four integers and attaches this shared memory segment to its address space. Pointer `ShmPTR` points to the shared memory segment. After this is done, we have the following:
 
-![Shared Memory](images/shm-4)
+![Shared Memory](images/shm-4.jpg)
 
 Then, this program forks a child process to run function `ClientProcess()`. Thus, two identical copies of address spaces are created, each of which has a variable `ShmPTR` whose value is a pointer to the shared memory. As a result, the child process has already known the location of the shared memory segment and does not have to use `shmget()` and `shmat()`. This is shown below:
 
-![Shared Memory with Fork](images/shm-5)
+![Shared Memory with Fork](images/shm-5.jpg)
 
 The parent waits for the completion of the child. For the child, it just retrieves the four integers, which were stored there by the parent before forking the child, prints them, and exits. The `wait()` system call in the parent will detect this. Finally, the parent exits.
 
