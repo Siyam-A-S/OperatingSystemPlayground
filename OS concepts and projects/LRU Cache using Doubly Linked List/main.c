@@ -65,5 +65,37 @@ void LRUCachePut(LRUCache* obj, int key, int value) {
     printf("key=%d\n", key);
     if (rem[key] != NULL) {
     struct node *curr = rem[key];
+    curr->val = value;
+    del(curr);
+    add(curr);
     }
+    else {
+        if(obj->count == obj->cap) {
+            obj->count--;
+            rem[tail->prev->key] = NULL;
+            del(tail->prev);
+        }
+
+        obj->count++;
+        struct node *curr = malloc(sizeof(struct node));
+        curr->val = value;
+        curr->key = key;
+        printf("curr=%x\n", curr);
+        printf("add key=%d val =%d \n", key, value);
+        rem[key] = curr;
+        add(curr);
+    }
+}
+
+void lRUCacheFree(LRUCache* obj) {
+    
+
+    for(int i = 0; i <= 10000; i++)
+        if(rem[i])
+            free(rem[i]);
+    
+    free(head);
+    free(tail);
+    free(obj);
+
 }
